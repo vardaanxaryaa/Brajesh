@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Num Info Web By Brajesh</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.container{
+    width:100%;
+    max-width:500px;
+    padding:35px 30px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(18px);
+    box-shadow:0 25px 50px rgba(0,0,0,0.25);
+    color:#fff;
+    animation:fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(30px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+h1{
+    text-align:center;
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+.subtitle{
+    text-align:center;
+    font-size:14px;
+    opacity:0.8;
+    margin-bottom:25px;
+}
+
+.card{
+    background:rgba(255,255,255,0.12);
+    padding:20px;
+    border-radius:15px;
+    margin-bottom:20px;
+}
+
+label{
+    font-size:14px;
+    display:block;
+    margin-bottom:6px;
+}
+
+input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:10px;
+    border:none;
+    outline:none;
+    font-size:16px;
+}
+
+input:focus{
+    box-shadow:0 0 0 2px #00ffd5;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#00ffd5,#00b3ff);
+    color:#000;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.02);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
+
+.actions{
+    display:flex;
+    gap:12px;
+    margin-top:12px;
+}
+
+.actions button{
+    background:#fff;
+    color:#333;
+    font-size:14px;
+}
+
+.loading{
+    text-align:center;
+    margin-top:15px;
+    font-size:14px;
+    display:none;
+}
+
+.result-box{
+    margin-top:18px;
+    background:rgba(0,0,0,0.35);
+    padding:16px;
+    border-radius:14px;
+    max-height:260px;
+    overflow:auto;
+    font-size:13px;
+    white-space:pre-wrap;
+    display:none;
+}
+
+.error{
+    color:#ffb4b4;
+}
+
+footer{
+    text-align:center;
+    margin-top:18px;
+    font-size:12px;
+    opacity:0.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>✨ Num Info Web By Brajesh</h1>
+<div class="subtitle">Premium Interface • Created by Brajesh Arya</div>
+
+<div class="card">
+
+<label>Mobile Number</label>
+<input type="text" id="phone" maxlength="10" placeholder="9876543210">
+
+<button onclick="fetchData()" style="margin-top:14px;">Search Details</button>
+
+<div class="actions">
+    <button onclick="copyData()">Copy JSON</button>
+    <button onclick="downloadData()">Save File</button>
+</div>
+
+</div>
+
+<div class="loading" id="loading">Loading data...</div>
+
+<div class="result-box" id="result"></div>
+
+<footer> Created ❤️ by Brajesh Arya</footer>
+
+</div>
+
+
+<script>
+
+const resultBox = document.getElementById("result");
+const loading = document.getElementById("loading");
+
+let lastJSON = "";
+
+async function fetchData(){
+
+    const phone = document.getElementById("phone").value.trim();
+
+    resultBox.style.display="none";
+    resultBox.classList.remove("error");
+    lastJSON = "";
+
+    if(!/^\d{10}$/.test(phone)){
+        resultBox.innerHTML="❌ Please enter valid 10 digit number";
+        resultBox.classList.add("error");
+        resultBox.style.display="block";
+        return;
+    }
+
+    loading.style.display="block";
+
+    try{
+
+        const url = `https://new-apiix-root-coders.deno.dev/?num=${phone}&key=PHON-EB3K-L9M2-2024A`;
+
+        const res = await fetch(url);
+
+        if(!res.ok){
+            throw new Error("Server Error : " + res.status);
+        }
+
+        const data = await res.json();
+
+        lastJSON = JSON.stringify(data,null,2);
+
+        resultBox.innerHTML = lastJSON;
+        resultBox.style.display="block";
+
+    }
+    catch(err){
+
+        resultBox.innerHTML = "⚠️ Error : " + err.message;
+        resultBox.classList.add("error");
+        resultBox.style.display="block";
+
+    }
+    finally{
+
+        loading.style.display="none";
+
+    }
+
+}
+
+function copyData(){
+
+    if(!lastJSON){
+        alert("No data to copy!");
+        return;
+    }
+
+    navigator.clipboard.writeText(lastJSON);
+    alert("Copied successfully!");
+}
+
+function downloadData(){
+
+    if(!lastJSON){
+        alert("No data to save!");
+        return;
+    }
+
+    const blob = new Blob([lastJSON],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "lafda_report.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+document.getElementById("phone").addEventListener("keypress",function(e){
+    if(e.key==="Enter"){
+        fetchData();
+    }
+});
+
+document.getElementById("phone").focus();
+
+</script>
+
+</body>
+</html>
